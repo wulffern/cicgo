@@ -24,69 +24,55 @@
 //  SOFTWARE.
 //
 //====================================================================
-package main
+
+package jsonwrap
 
 import (
 	"fmt"
+	"encoding/json"
 	"os"
+
+	"bufio"
+	"strings"
 	"regexp"
-	"github.com/wulffern/cicgo/pkg/cic"
 )
 
-func main(){
+func  ReadFromJsonFile(file string, data interface{}){
 
-	includePaths := []string{}
-	arguments := []string{}
+	jsonFile, err := os.Open(file)
 
-	argsWithoutProg := os.Args[1:]
-
-	for i := 0;i<len(argsWithoutProg);i++{
-		a := argsWithoutProg[i]
-		match,_ := regexp.MatchString("^--I",a)
-		if(match){
-			includePaths = append(includePaths, argsWithoutProg[i+1])
-			i++
-		}else{
-			arguments = append(arguments,a)
-		}
+	if err != nil {
+		fmt.Println("Could not find rulefile")
+		panic(err)
 	}
-	if(len(arguments) >= 2){
-		file := arguments[0]
-		rulefile := arguments[1]
-		library := ""
-		if(len(arguments) > 2){
-			library = arguments[2]
+
+	defer jsonFile.Close()
+
+	scanner := bufio.NewScanner(jsonFile)
+	builder := strings.Builder{}
+	for scanner.Scan(){
+		line := scanner.Text()
+		m,_ := regexp.MatchString("^\\s*//",line)
+		if(m){
+			continue
 		}
-		if(library == ""){
-			r,_ := regexp.Compile("/?([^\\/]+)\\.json")
-			re := r.FindStringSubmatch(file)
-			library = re[1]
-		}
-
-
-		//TODO(cawu): Call rules
-		//TODO(cawu): Call design
-		//TODO(cawu): Write .cic file
-
-		cic.LoadRules(rulefile)
-		d := cic.NewDesign(includePaths)
-		d.Read(file)
-		//s, _ := json.MarshalIndent(&rules.Rules, "", "\t")
-		//fmt.Println(rules.Rules.DesignRules)
-
-		_= library
-		_ = file
-		_ = rulefile
-	}else{
-		help := `Usage: cic <JSON file> <Technology file> [<Output name>]
-Example: cic SAR_ESSCIRC16_28N tech.json
-About:
-    cIcCreator reads a JSON object definition file, a technology rule file
-    and a SPICE netlist (assuming the same name as object definition file)
-    and outputs a cic description file (.cic)
-Options:
-    --I       <path>        Path to search for include files
-`
-		fmt.Printf(help)
+		builder.WriteString(line)
 	}
+
+	buff := builder.String()
+	//fmt.Println(buff)
+
+	byteValue := []byte(buff)
+
+
+
+    err = json.Unmarshal([]byte(byteValue), &data)
+	if err != nil {
+		fmt.Errorf("Error parsing json file '%s'\n",file)
+
+		panic(err)
+	}
+
+	return
+
 }

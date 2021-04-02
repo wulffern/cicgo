@@ -25,13 +25,10 @@
 //
 //====================================================================
 
-package rules
+package cic
 
 import (
-	"encoding/json"
-	"fmt"
-	"os"
-	"io/ioutil"
+	"github.com/wulffern/cicgo/internal/jsonwrap"
 )
 
 var Rules RulesType
@@ -73,26 +70,8 @@ type RulesType struct{
 	DesignRules map[string]map[string]float64 `json:"rules"`
 }
 
-func Load(rulefile string){
+func LoadRules(rulefile string){
 
-	jsonFile, err := os.Open(rulefile)
-
-	if err != nil {
-		fmt.Println("Could not find rulefile")
-		panic(err)
-	}
-
-	defer jsonFile.Close()
-
-	byteValue, err := ioutil.ReadAll(jsonFile)
-
-
-
-    err = json.Unmarshal([]byte(byteValue), &Rules)
-	if err != nil {
-		fmt.Errorf("Error parsing rule file '%s'\n",rulefile)
-		//TODO(cawu): Figure out how to print line with error
-		panic(err)
-	}
+	jsonwrap.ReadFromJsonFile(rulefile,&Rules)
 
 }

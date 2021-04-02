@@ -1,7 +1,7 @@
 //====================================================================
 //        Copyright (c) 2021 Carsten Wulff Software, Norway
 // ===================================================================
-// Created       : wulff at 2021-3-29
+// Created       : wulff at 2021-3-30
 // ===================================================================
 //  The MIT License (MIT)
 //
@@ -24,69 +24,53 @@
 //  SOFTWARE.
 //
 //====================================================================
-package main
+
+package cic
 
 import (
 	"fmt"
-	"os"
-	"regexp"
-	"github.com/wulffern/cicgo/pkg/cic"
+	"strings"
 )
 
-func main(){
-
-	includePaths := []string{}
-	arguments := []string{}
-
-	argsWithoutProg := os.Args[1:]
-
-	for i := 0;i<len(argsWithoutProg);i++{
-		a := argsWithoutProg[i]
-		match,_ := regexp.MatchString("^--I",a)
-		if(match){
-			includePaths = append(includePaths, argsWithoutProg[i+1])
-			i++
-		}else{
-			arguments = append(arguments,a)
-		}
-	}
-	if(len(arguments) >= 2){
-		file := arguments[0]
-		rulefile := arguments[1]
-		library := ""
-		if(len(arguments) > 2){
-			library = arguments[2]
-		}
-		if(library == ""){
-			r,_ := regexp.Compile("/?([^\\/]+)\\.json")
-			re := r.FindStringSubmatch(file)
-			library = re[1]
-		}
 
 
-		//TODO(cawu): Call rules
-		//TODO(cawu): Call design
-		//TODO(cawu): Write .cic file
+const (
+	AnsiBlack = "30"
+	AnsiRed = "31"
+	AnsiGreen = "32"
+	AnsiBrown = "33"
+	AnsiBlue = "34"
+	AnsiMagenta = "35"
+	AnsiCyan = "36"
+	AnsiLightgray = "37"
+	AnsiStart = "\033[0;"
+	AnsiReset = "\033[0m"
+)
 
-		cic.LoadRules(rulefile)
-		d := cic.NewDesign(includePaths)
-		d.Read(file)
-		//s, _ := json.MarshalIndent(&rules.Rules, "", "\t")
-		//fmt.Println(rules.Rules.DesignRules)
+var reportIndent int = 0
 
-		_= library
-		_ = file
-		_ = rulefile
-	}else{
-		help := `Usage: cic <JSON file> <Technology file> [<Output name>]
-Example: cic SAR_ESSCIRC16_28N tech.json
-About:
-    cIcCreator reads a JSON object definition file, a technology rule file
-    and a SPICE netlist (assuming the same name as object definition file)
-    and outputs a cic description file (.cic)
-Options:
-    --I       <path>        Path to search for include files
-`
-		fmt.Printf(help)
-	}
+func mental(msg string){
+	report(msg,AnsiRed)
+}
+
+func warning(msg string){
+	report(msg,AnsiBlue)
+}
+
+func comment(cm string){
+	report(cm,AnsiGreen)
+}
+
+func report(msg string, color string){
+	fmt.Println(AnsiStart+color+ "m",strings.Repeat(" ",reportIndent),msg ,AnsiReset)
+}
+
+func increaseIndent(){
+	reportIndent++
+	reportIndent++
+}
+
+func decreaseIndent(){
+	reportIndent--
+	reportIndent--
 }

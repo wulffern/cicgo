@@ -1,7 +1,7 @@
 //====================================================================
 //        Copyright (c) 2021 Carsten Wulff Software, Norway
 // ===================================================================
-// Created       : wulff at 2021-3-29
+// Created       : wulff at 2021-3-30
 // ===================================================================
 //  The MIT License (MIT)
 //
@@ -24,69 +24,62 @@
 //  SOFTWARE.
 //
 //====================================================================
-package main
 
-import (
-	"fmt"
-	"os"
-	"regexp"
-	"github.com/wulffern/cicgo/pkg/cic"
-)
+package cic
 
-func main(){
+type NewCellType func(string) Cell
 
-	includePaths := []string{}
-	arguments := []string{}
+type Cell interface{
+	Rect
+	Name() string
+	SetName(string)
+	Place()
+	Route()
+	AddAllPorts()
+	Paint()
+}
 
-	argsWithoutProg := os.Args[1:]
+type cell struct{
+	rect
+	name string
+	routes map[string]Rect
+	ports map[string]Rect
+	namedRects map[string]Rect
+	children []Rect
+}
 
-	for i := 0;i<len(argsWithoutProg);i++{
-		a := argsWithoutProg[i]
-		match,_ := regexp.MatchString("^--I",a)
-		if(match){
-			includePaths = append(includePaths, argsWithoutProg[i+1])
-			i++
-		}else{
-			arguments = append(arguments,a)
-		}
-	}
-	if(len(arguments) >= 2){
-		file := arguments[0]
-		rulefile := arguments[1]
-		library := ""
-		if(len(arguments) > 2){
-			library = arguments[2]
-		}
-		if(library == ""){
-			r,_ := regexp.Compile("/?([^\\/]+)\\.json")
-			re := r.FindStringSubmatch(file)
-			library = re[1]
-		}
+func (d *Design) NewCell(name string) Cell{
+	c := cell{}
+	c.InitCell(name)
+	return &c
+}
+
+func (c *cell) InitCell(name string){
+	c.InitRect()
+	c.name = name
+}
+
+func (c *cell) Name() string{
+	return c.name
+}
+
+func (c *cell) SetName(n string){
+	c.name = n
+}
+
+func (c *cell) Place(){
+
+}
+
+func (c *cell) Route(){
+
+}
 
 
-		//TODO(cawu): Call rules
-		//TODO(cawu): Call design
-		//TODO(cawu): Write .cic file
+func (c *cell) AddAllPorts(){
 
-		cic.LoadRules(rulefile)
-		d := cic.NewDesign(includePaths)
-		d.Read(file)
-		//s, _ := json.MarshalIndent(&rules.Rules, "", "\t")
-		//fmt.Println(rules.Rules.DesignRules)
+}
 
-		_= library
-		_ = file
-		_ = rulefile
-	}else{
-		help := `Usage: cic <JSON file> <Technology file> [<Output name>]
-Example: cic SAR_ESSCIRC16_28N tech.json
-About:
-    cIcCreator reads a JSON object definition file, a technology rule file
-    and a SPICE netlist (assuming the same name as object definition file)
-    and outputs a cic description file (.cic)
-Options:
-    --I       <path>        Path to search for include files
-`
-		fmt.Printf(help)
-	}
+func (c *cell) Paint(){
+
 }

@@ -1,7 +1,7 @@
 //====================================================================
 //        Copyright (c) 2021 Carsten Wulff Software, Norway
 // ===================================================================
-// Created       : wulff at 2021-3-29
+// Created       : wulff at 2021-3-30
 // ===================================================================
 //  The MIT License (MIT)
 //
@@ -24,69 +24,35 @@
 //  SOFTWARE.
 //
 //====================================================================
-package main
+
+package cic
+
 
 import (
-	"fmt"
-	"os"
-	"regexp"
-	"github.com/wulffern/cicgo/pkg/cic"
+	//"fmt"
 )
 
-func main(){
+type PatternTile interface{
+	Cell
+	FillCoordinatesFromString()
+}
 
-	includePaths := []string{}
-	arguments := []string{}
-
-	argsWithoutProg := os.Args[1:]
-
-	for i := 0;i<len(argsWithoutProg);i++{
-		a := argsWithoutProg[i]
-		match,_ := regexp.MatchString("^--I",a)
-		if(match){
-			includePaths = append(includePaths, argsWithoutProg[i+1])
-			i++
-		}else{
-			arguments = append(arguments,a)
-		}
-	}
-	if(len(arguments) >= 2){
-		file := arguments[0]
-		rulefile := arguments[1]
-		library := ""
-		if(len(arguments) > 2){
-			library = arguments[2]
-		}
-		if(library == ""){
-			r,_ := regexp.Compile("/?([^\\/]+)\\.json")
-			re := r.FindStringSubmatch(file)
-			library = re[1]
-		}
+type patternTile struct{
+	cell
+}
 
 
-		//TODO(cawu): Call rules
-		//TODO(cawu): Call design
-		//TODO(cawu): Write .cic file
+func NewPatternTile(name string) Cell{
+	c := patternTile{}
+	c.InitCell(name)
+	return &c
 
-		cic.LoadRules(rulefile)
-		d := cic.NewDesign(includePaths)
-		d.Read(file)
-		//s, _ := json.MarshalIndent(&rules.Rules, "", "\t")
-		//fmt.Println(rules.Rules.DesignRules)
+}
 
-		_= library
-		_ = file
-		_ = rulefile
-	}else{
-		help := `Usage: cic <JSON file> <Technology file> [<Output name>]
-Example: cic SAR_ESSCIRC16_28N tech.json
-About:
-    cIcCreator reads a JSON object definition file, a technology rule file
-    and a SPICE netlist (assuming the same name as object definition file)
-    and outputs a cic description file (.cic)
-Options:
-    --I       <path>        Path to search for include files
-`
-		fmt.Printf(help)
-	}
+func (p *patternTile) FillCoordinatesFromString(in []interface{}){
+
+
+
+
+
 }
