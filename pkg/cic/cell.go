@@ -33,6 +33,7 @@ type Cell interface{
 	Rect
 	Name() string
 	SetName(string)
+	Init()
 	Place()
 	Route()
 	AddAllPorts()
@@ -43,9 +44,10 @@ type cell struct{
 	rect
 	name string
 	routes map[string]Rect
-	ports map[string]Rect
+	ports map[string]Port
 	namedRects map[string]Rect
 	children []Rect
+
 }
 
 func (d *Design) NewCell(name string) Cell{
@@ -65,6 +67,35 @@ func (c *cell) Name() string{
 
 func (c *cell) SetName(n string){
 	c.name = n
+}
+
+func (c *cell) GetPort(name string) Port{
+	if val,ok :=  c.ports[name];ok{
+		return val
+	}
+	return nil
+}
+
+func (c *cell) AddPort(name string, r Rect){
+	p := NewPort(name)
+	p.Set(r)
+	//TODO: p.SpicePort = c.IsSpicePort(name)
+	c.Add(p)
+}
+
+func (c *cell) Add(child Rect){
+	if(child == nil){
+
+		return
+	}
+
+	//TODO: Figure out how I should do the children in GO
+	//Should it be a map? or a list? I need a contains function to check if the
+
+}
+
+func (c *cell) Init(){
+
 }
 
 func (c *cell) Place(){

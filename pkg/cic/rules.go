@@ -29,9 +29,11 @@ package cic
 
 import (
 	"github.com/wulffern/cicgo/internal/jsonwrap"
+	"fmt"
 )
 
 var Rules RulesType
+
 
 
 type Layer struct{
@@ -71,7 +73,16 @@ type RulesType struct{
 }
 
 func LoadRules(rulefile string){
-
 	jsonwrap.ReadFromJsonFile(rulefile,&Rules)
+}
 
+func (r *RulesType) get(key string, element string) int{
+
+	v,ok := r.DesignRules[key][element]
+	if(ok){
+		return int(v*float64(r.Technology.Gamma))
+	}else{
+		mental(fmt.Sprintf("Could not find rule ",key,element))
+		panic("Crap, no rule")
+	}
 }

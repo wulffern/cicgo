@@ -28,6 +28,13 @@
 package cic
 
 type Rect interface{
+	Layer() string
+	Connect(func())
+	X1() int
+	Y1() int
+	X2() int
+	Y2() int
+	SetLayer(string)
 	//Left() int
 	//Right() int
 	//Top() int
@@ -42,23 +49,83 @@ type Rect interface{
 }
 
 type rect struct{
-	Layer string
-	Net string
-	X1 int
-	Y1 int
-	X2 int
-	Y2 int
-	IsDevice bool
+	layer string
+	net string
+	x1 int
+	y1 int
+	x2 int
+	y2 int
+	isDevice bool
+	listeners []func()
 }
 
-//func NewRect()
-//
+
+func NewRect() Rect{
+	r := rect{}
+	r.InitRect()
+	return &r
+}
 
 func (r *rect) InitRect(){
-	r.X1 =	 0
-	r.Y1 = 0
-	r.X2 = 0
-	r.Y2 = 0
-	r.Layer = ""
-	r.Net = ""
+	r.x1 =	 0
+	r.y1 = 0
+	r.x2 = 0
+	r.y2 = 0
+	r.layer = ""
+	r.net = ""
+	r.listeners = make([]func(),0)
+}
+
+func (r *rect) Layer()string{
+	return r.layer
+}
+
+func (r *rect) X1() int{
+	return r.x1
+}
+
+func (r *rect) X2() int{
+	return r.x2
+}
+
+func (r *rect) Y1() int{
+	return r.y1
+}
+
+func (r *rect) Y2() int{
+	return r.y2
+}
+
+
+func (r *rect) SetLayer(layer string){
+	r.layer = layer
+}
+
+func (r *rect) SetRect(layer string, x1 int, y1 int, width int, height int){
+	r.layer = layer
+	r.x1 = x1
+	r.y1 = y1
+	r.x2 = x1 + width
+	r.y2 = y1 + height
+}
+
+func (r *rect) SetRectFromRect(rs Rect){
+	r.layer = rs.Layer()
+	r.x1 = rs.X1()
+	r.y1 = rs.Y1()
+	r.x2 = rs.X2()
+	r.y2 = rs.Y2()
+}
+
+
+func (r *rect) Connect(fp func()){
+	r.listeners = append(r.listeners,fp)
+}
+
+
+
+func (r *rect) Updated(){
+	for _,fp := range r.listeners{
+		fp()
+	}
 }

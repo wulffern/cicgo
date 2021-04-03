@@ -1,7 +1,7 @@
 //====================================================================
 //        Copyright (c) 2021 Carsten Wulff Software, Norway
 // ===================================================================
-// Created       : wulff at 2021-3-30
+// Created       : wulff at 2021-4-3
 // ===================================================================
 //  The MIT License (MIT)
 //
@@ -27,37 +27,50 @@
 
 package cic
 
-import (
-	"math"
-)
-
-
-type PatternTransistor interface{
-	PatternTile
+type Port interface{
+	Rect
+	Set(r Rect)
 
 }
 
-type patternTransistor struct{
-	patternTile
+type port struct{
+	rect
+	name string
+	routeLayer Layer
+	drawRect Rect
+	altRects []Rect
 }
 
-func (d *Design) NewPatternTransistor(name string) Cell{
-	p := patternTransistor{}
-	p.InitPatternTransistor(name)
+
+func NewPort(name string) Port{
+	p := port{}
+	p.InitPort(name)
 	return &p
 }
 
-func ( p *patternTransistor ) InitPatternTransistor(name string){
-	p.InitPatternTile(name)
+func (p *port) InitPort(name string){
+	p.name = name
+	p.altRects = make([]Rect,0)
+	p.drawRect = nil
+
 }
 
-func (p *patternTransistor) InitCoordinatesData() map[string]interface{}{
-	data := make(map[string]interface{})
-	data["isTransistor"] = false
-	data["wmin"] = math.MaxInt32
-	data["wmax"] = math.MinInt32
-	data["pofinger"] = 0
-	data["nf"] = 0
-	data["useMinLength"] = false
-	return data
+
+func (p *port) Set(r Rect){
+	if(r == nil){
+		return
+	}
+
+	p.routeLayer = Rules.Layers[r.Layer()]
+	p.altRects = append(p.altRects,r)
+	p.drawRect = r
+	p.SetRectFromRect(r)
+	r.Connect(p.UpdateRect)
+
+}
+
+func (p *port) UpdateRect(){
+	if(p.drawRect != nil){
+		p.SetRectFromRect(p.drawRect)
+	}
 }

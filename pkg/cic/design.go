@@ -85,8 +85,6 @@ func (d *Design) Read(file string) bool{
 }
 
 func (d *Design) ReadCells(file string) bool{
-
-
     jdata := d.readJsonAndSpice(file)
     d.readOptions(jdata)
     d.readPatterns(jdata)
@@ -160,10 +158,7 @@ func (d *Design) readIncludes(jdata *DesignDataType){
 func (d *Design) createCell(jobj jObject) {
 
     name := jString("name",jobj)
-	if jBool("abstract",jobj){
-		comment(fmt.Sprintf("Skipping abstract cell %s",name))
-		return
-	}
+
 
     //Store src data so I can access it later
     d.jCells[name] = jobj
@@ -172,6 +167,11 @@ func (d *Design) createCell(jobj jObject) {
         //warning("Cell without name somewhere in input data" + fmt.Sprintf("%v",data))
         return
     }
+
+    if jBool("abstract",jobj){
+		comment(fmt.Sprintf("Skipping abstract cell %s",name))
+		return
+	}
 
     comment(name)
 
@@ -220,7 +220,7 @@ func (d *Design) createCell(jobj jObject) {
 	fptr := reflect.ValueOf(d).MethodByName(ctr)
 
     if(!fptr.IsValid()){
-        warning(fmt.Sprintf("Could not find constructor for %v",cl))
+        warning(fmt.Sprintf("Could not find constructor for %v",ctr))
         return
     }
 
@@ -233,6 +233,8 @@ func (d *Design) createCell(jobj jObject) {
     d.run("afterNew",c,&rParents,jobj)
 
     d.run("",c,&rParents,jobj)
+
+    c.Init()
 
     d.run("beforePlace",c,&rParents,jobj)
     //comment("Placing")

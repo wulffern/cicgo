@@ -30,7 +30,9 @@
 package cic
 
 import (
-
+	"math"
+	"reflect"
+	"fmt"
 )
 
 type jObject map[string]interface{}
@@ -61,4 +63,30 @@ func jBool(key string,data jObject) bool{
 		}
 	}
 	return false
+}
+
+func iStrings(in []interface{}) []string{
+	s := make([]string, len(in))
+	for i, v := range in {
+		s[i] = fmt.Sprint(v)
+	}
+	return s
+}
+
+func iBool(in interface{}) bool{
+	switch in.(type){
+		case float64:
+			n := in.(float64)
+			if(math.Abs(1e-5 - n)> 1e-4){
+				return true
+			}
+		case bool:
+			return in.(bool)
+		default:
+			mental(fmt.Sprintf("Don't know type %v",reflect.TypeOf(in)))
+			panic("You should implement this type conversion")
+
+	}
+	return false
+
 }
